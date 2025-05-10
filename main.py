@@ -11,8 +11,8 @@ b = 1
 h = 0.1
 initial_conditions = (0,0)
 
-# Keep duration 500 or below if you want manageable data
-duration = 250
+# Keep duration 500 below if you want manageable data
+duration = 500
 
 def current_time_millis():
     return round(time.time() * 1000)
@@ -22,14 +22,14 @@ def safe_divide(numerator, denominator):
     try:
         return numerator / denominator
     except ZeroDivisionError:
-        print("[Warning] ZeroDivisionError returning: \"NaN\"")
-        return(float('nan'))
+        print("[Warning] ZeroDivisionError returning: \'NaN\'")
+        return(float('NaN'))
 
 # Here the differential equation and explicit solution are set
 # The differential equation can be swapped out, but the explicit solution as well as 
 # parameters, variables and arguments throughout the program will have to be changed 
 def differential_equation(a,b,y):
-    return a * y + b
+    return a*y + b
 
 def solution(a, b, t):
     return safe_divide(b, a) * math.exp(a * t) - safe_divide(b, a)
@@ -50,7 +50,7 @@ def write_to_csv(filename, a, b):
         writer_obj.writerow([a, b])
 
 # Eulers method for numerical approximation of solution to differential equations
-def euler():
+def euler():    
     now = current_time_millis()
     t_n, y_n = initial_conditions
 
@@ -90,10 +90,14 @@ def create_method_analysis(method):
                 # Accuracy metric based on the relationship between numerical approximation and real solution at t_n
                 # The accuracy metric is bounded to [0, 1] where 1 means perfect accuracy
                 # The metric is logarithmically symmetric in ratio-space 
+                def log_accuracy(a, b):
+                    return math.exp(-abs(math.log(safe_divide(a,b))))
+                
                 y_solution = solution(a, b, float(row[0]))
                 y_approximation = float(row[1])
-                accuracy = math.exp(math.log(abs((safe_divide(y_approximation, y_solution)))))
-                # Creates a CSV-file holding the method-specific accuracy metric for each value of t_n
+                accuracy = log_accuracy(y_solution, y_approximation)
+
+                # Creates a CSV file holding the method-specific accuracy metric for each value of t_n
                 # Errorhandling in case the accuracy value is a number - Ignores the case of initial_value = (0, 0)
                 if not math.isnan(accuracy):
                     write_to_csv(f'{method}_accuracy.csv', row[0], accuracy)
